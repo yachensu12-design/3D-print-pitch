@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 打印创业 · 可行性分析 v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --paper: #f5f0e8;
+    --accent: #c9440a;
+    --gold: #d4a843;
+    --pale: #e8e0d0;
+    --green: #2d6a4f;
+    --red: #8b1a1a;
+    --muted: #7a7060;
+    --blue: #2d5a8b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--ink); font-family: 'Noto Serif SC', serif; color: var(--paper); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+
+  .deck { width: 100%; max-width: 880px; padding: 0 16px 60px; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 16px; border-bottom: 1px solid #3a3028; margin-bottom: 24px; position: sticky; top: 0; background: var(--ink); z-index: 10; flex-wrap: wrap; gap: 8px; }
+  .nav-title { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .nav-dots { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #3a3028; cursor: pointer; transition: all 0.3s; border: none; }
+  .dot.active { background: var(--accent); transform: scale(1.4); }
+  .dot:hover { background: var(--gold); }
+  .nav-arrows { display: flex; gap: 8px; align-items: center; }
+  .arrow-btn { background: none; border: 1px solid #3a3028; color: var(--paper); width: 30px; height: 30px; border-radius: 4px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .arrow-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .arrow-btn:disabled { opacity: 0.2; cursor: default; }
+  .slide-counter { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); min-width: 40px; text-align: center; }
+
+  .progress-bar { height: 2px; background: #3a3028; border-radius: 2px; margin-bottom: 28px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+
+  .slide { display: none; animation: fadeIn 0.35s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .slide-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+  h1 { font-size: clamp(28px, 5.5vw, 50px); font-weight: 900; line-height: 1.1; }
+  h2 { font-size: clamp(20px, 3.5vw, 30px); font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+  .accent-line { width: 44px; height: 3px; background: var(--accent); margin: 16px 0; }
+  p { color: #c8bfad; line-height: 1.8; font-size: 14px; }
+  .tagline { font-size: clamp(13px, 2.2vw, 16px); color: var(--gold); font-style: italic; margin-top: 6px; }
+
+  .card-grid { display: grid; gap: 14px; margin-top: 8px; }
+  .card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 580px) { .card-grid.cols-2, .card-grid.cols-3 { grid-template-columns: 1fr; } }
+
+  .card { background: #231e18; border: 1px solid #3a3028; border-radius: 8px; padding: 18px; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .card.green::before { background: var(--green); }
+  .card.red::before { background: var(--red); }
+  .card.gold::before { background: var(--gold); }
+  .card.accent::before { background: var(--accent); }
+  .card.blue::before { background: var(--blue); }
+  .card-icon { font-size: 22px; margin-bottom: 8px; }
+  .card-title { font-weight: 700; font-size: 13px; color: var(--paper); margin-bottom: 6px; }
+  .card p { font-size: 12px; }
+
+  .verdict-box { border: 1px solid var(--gold); border-radius: 10px; padding: 24px; margin-top: 18px; background: linear-gradient(135deg, #1e1912, #231e18); position: relative; overflow: hidden; }
+  .verdict-box::after { content: '★'; position: absolute; right: 20px; top: 16px; color: var(--gold); font-size: 24px; opacity: 0.25; }
+  .verdict-title { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
+  .verdict-text { font-size: 14px; color: var(--paper); line-height: 1.7; }
+
+  .big-quote { border-left: 3px solid var(--gold); padding: 10px 18px; margin: 20px 0; font-style: italic; color: var(--gold); font-size: 14px; line-height: 1.7; }
+
+  /* PROBLEM BLOCKS */
+  .problem-block { border-left: 3px solid #3a3028; padding: 14px 18px; margin-bottom: 12px; background: #1e1912; border-radius: 0 6px 6px 0; cursor: pointer; transition: all 0.2s; }
+  .problem-block:hover, .problem-block.open { border-left-color: var(--accent); background: #252018; }
+  .problem-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .problem-title { font-weight: 700; font-size: 13px; color: var(--paper); flex: 1; }
+  .problem-tag { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+  .tag-hard { background: #3d1a1a; color: #e07070; }
+  .tag-mid { background: #3d2e0a; color: #e0a040; }
+  .tag-ok { background: #1a3020; color: #60c080; }
+  .problem-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.25s; }
+  .problem-block.open .problem-answer { max-height: 300px; padding-top: 10px; }
+  .problem-answer p { font-size: 12px; }
+  .chevron { color: var(--muted); font-size: 11px; transition: transform 0.25s; flex-shrink: 0; }
+  .problem-block.open .chevron { transform: rotate(90deg); }
+
+  /* TABLE */
+  .opp-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; }
+  .opp-table th { text-align: left; padding: 9px 12px; background: #1e1912; color: var(--gold); font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid #3a3028; }
+  .opp-table td { padding: 10px 12px; border-bottom: 1px solid #2a2418; color: #c8bfad; vertical-align: top; }
+  .opp-table tr:hover td { background: #1e1912; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-family: 'Space Mono', monospace; font-size: 9px; }
+  .badge-green { background: #1a3020; color: #60c080; }
+  .badge-yellow { background: #3d2e0a; color: #e0a040; }
+  .badge-red { background: #3d1a1a; color: #e07070; }
+
+  /* STEPS */
+  .steps { margin-top: 8px; }
+  .step { display: flex; gap: 14px; margin-bottom: 18px; align-items: flex-start; }
+  .step-num { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent); background: #2a1e18; border: 1px solid var(--accent); border-radius: 4px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-content .step-title { font-weight: 700; font-size: 13px; color: var(--paper); margin-bottom: 4px; }
+  .step-content p { font-size: 12px; }
+
+  /* MARKET SIZING */
+  .funnel { display: flex; flex-direction: column; gap: 6px; margin-top: 20px; }
+  .funnel-row { display: flex; align-items: center; gap: 12px; position: relative; }
+  .funnel-bar-wrap { flex: 1; height: 40px; background: #1e1912; border-radius: 4px; overflow: hidden; position: relative; }
+  .funnel-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding: 0 12px; transition: width 1s ease; }
+  .funnel-label { font-size: 11px; color: var(--paper); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .funnel-num { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--gold); white-space: nowrap; min-width: 100px; text-align: right; }
+  .funnel-pct { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); min-width: 40px; }
+  .funnel-arrow { text-align: center; color: var(--muted); font-size: 14px; }
+
+  .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+  @media (max-width: 500px) { .market-grid { grid-template-columns: 1fr; } }
+  .market-stat { background: #1e1912; border: 1px solid #3a3028; border-radius: 8px; padding: 16px; }
+  .market-stat-num { font-family: 'Space Mono', monospace; font-size: 22px; color: var(--gold); font-weight: 700; line-height: 1; }
+  .market-stat-sub { font-size: 10px; color: var(--accent); font-family: 'Space Mono', monospace; margin-top: 2px; }
+  .market-stat-label { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  .assumption-list { margin-top: 16px; }
+  .assumption { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #2a2418; gap: 12px; }
+  .assumption:last-child { border-bottom: none; }
+  .assumption-key { font-size: 12px; color: #c8bfad; flex: 1; }
+  .assumption-val { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--gold); white-space: nowrap; }
+  .assumption-note { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* STAKEHOLDER MAP */
+  #stakeholder-canvas-wrap { position: relative; margin-top: 16px; background: #1a1410; border: 1px solid #3a3028; border-radius: 10px; overflow: hidden; }
+  #stakeholder-canvas { display: block; width: 100%; cursor: default; }
+  .sh-tooltip { position: absolute; background: #231e18; border: 1px solid #3a3028; border-radius: 6px; padding: 10px 14px; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 5; min-width: 180px; max-width: 240px; }
+  .sh-tooltip-name { font-weight: 700; font-size: 13px; color: var(--paper); margin-bottom: 4px; }
+  .sh-tooltip-detail { font-size: 11px; color: #c8bfad; line-height: 1.5; }
+  .sh-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; justify-content: center; }
+  .sh-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .sh-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* USER SEGMENTS */
+  .segment-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .seg-tab { background: #231e18; border: 1px solid #3a3028; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.1em; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+  .seg-tab:hover { border-color: var(--gold); color: var(--gold); }
+  .seg-tab.active { border-color: var(--accent); color: var(--accent); background: #2a1e18; }
+  .segment-panel { display: none; }
+  .segment-panel.active { display: block; animation: fadeIn 0.25s ease; }
+
+  .need-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  @media (max-width: 500px) { .need-grid { grid-template-columns: 1fr; } }
+  .need-card { background: #1e1912; border: 1px solid #2a2418; border-radius: 6px; padding: 12px 14px; }
+  .need-card-type { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .need-card-type.functional { color: #60c080; }
+  .need-card-type.emotional { color: #e0a040; }
+  .need-card-type.social { color: #70a0e0; }
+  .need-card-type.pain { color: #e07070; }
+  .need-card-title { font-size: 12px; font-weight: 700; color: var(--paper); margin-bottom: 3px; }
+  .need-card-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  .seg-profile { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; padding: 14px; background: #1e1912; border-radius: 8px; }
+  .seg-avatar { font-size: 36px; line-height: 1; }
+  .seg-name { font-weight: 700; font-size: 15px; color: var(--paper); }
+  .seg-desc { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .seg-tag { display: inline-block; font-family: 'Space Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 20px; margin-top: 6px; margin-right: 4px; }
+
+  /* HERO */
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+  @media (max-width: 500px) { .hero-grid { grid-template-columns: 1fr; } }
+  .hero-stat { background: #231e18; border: 1px solid #3a3028; border-radius: 8px; padding: 14px 18px; }
+  .hero-stat-num { font-family: 'Space Mono', monospace; font-size: 24px; color: var(--gold); font-weight: 700; }
+  .hero-stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+</style>
+</head>
+<body>
+<div class="deck">
+  <nav class="nav">
+    <span class="nav-title">3D Print Startup · v2</span>
+    <div class="nav-dots" id="dots"></div>
+    <div class="nav-arrows">
+      <button class="arrow-btn" id="prevBtn" onclick="changeSlide(-1)">←</button>
+      <span class="slide-counter" id="counter">1 / 9</span>
+      <button class="arrow-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+    </div>
+  </nav>
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+  <!-- S1: CONCEPT -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-label">01 · 核心构思</div>
+    <h1>不是卖打印机<br>而是卖<span style="color:var(--accent)">体验</span></h1>
+    <div class="accent-line"></div>
+    <p class="tagline">"模型 + 改件包 + 教程"——一个完整的创作礼盒</p>
+    <p style="margin-top:18px">你瞄准的不是 3D 打印玩家，而是那些<strong style="color:var(--paper)">想进入这个世界、却被门槛挡在门外</strong>的人。这是一个被现有平台严重忽视的群体。</p>
+    <div class="hero-grid">
+      <div class="hero-stat"><div class="hero-stat-num">376万台</div><div class="hero-stat-label">2024年中国消费级3D打印机出货量</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">+51.6%</div><div class="hero-stat-label">2024上半年产量同比增速（超新能源汽车）</div></div>
+    </div>
+    <div class="big-quote">MakerWorld 解决了"打印什么"的问题，<br>但没有解决"打完之后怎么办"的问题。</div>
+    <div class="card-grid cols-3">
+      <div class="card green"><div class="card-icon">🖨️</div><div class="card-title">模型文件</div><p>精选或原创，适配主流打印机</p></div>
+      <div class="card gold"><div class="card-icon">🔩</div><div class="card-title">改件包</div><p>五金件、灯珠、电源等实物配件</p></div>
+      <div class="card accent"><div class="card-icon">📖</div><div class="card-title">教程说明</div><p>图文步骤，手把手完成成品</p></div>
+    </div>
+  </div>
+
+  <!-- S2: MARKET SIZING -->
+  <div class="slide" id="slide-1">
+    <div class="slide-label">02 · 市场规模估算</div>
+    <h2>目标市场有多大？</h2>
+    <p>基于公开数据，采用<strong style="color:var(--paper)">自上而下漏斗模型</strong>估算中国可触达市场规模（TAM → SAM → SOM）</p>
+
+    <div class="funnel" id="funnel-viz">
+      <div class="funnel-row">
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%;background:linear-gradient(90deg,#2d5a8b,#1a3a5c)"><span class="funnel-label">中国消费级3D打印机存量用户</span></div></div>
+        <div class="funnel-num">~800万人</div>
+        <div class="funnel-pct">100%</div>
+      </div>
+      <div class="funnel-arrow">↓ × 60%（闲置/初学比例）</div>
+      <div class="funnel-row">
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:60%;background:linear-gradient(90deg,#2d6a4f,#1a4a32)"><span class="funnel-label">有改造/上手诉求的新手用户</span></div></div>
+        <div class="funnel-num">~480万人</div>
+        <div class="funnel-pct">60%</div>
+      </div>
+      <div class="funnel-arrow">↓ × 30%（愿为套件付溢价）</div>
+      <div class="funnel-row">
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:18%;background:linear-gradient(90deg,#c9440a,#8b2c06)"><span class="funnel-label">愿意购买套件的目标客户</span></div></div>
+        <div class="funnel-num">~144万人</div>
+        <div class="funnel-pct">18%</div>
+      </div>
+      <div class="funnel-arrow">↓ × 首年渗透率 2%</div>
+      <div class="funnel-row">
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:3.6%;background:linear-gradient(90deg,#d4a843,#8b6c1a)"><span class="funnel-label" style="font-size:10px">可实现首年客户数</span></div></div>
+        <div class="funnel-num" style="color:var(--accent)">~2.9万人</div>
+        <div class="funnel-pct">~2%</div>
+      </div>
+    </div>
+
+    <div class="market-grid">
+      <div class="market-stat">
+        <div class="market-stat-num">¥29亿</div>
+        <div class="market-stat-sub">SAM · 可触达市场</div>
+        <div class="market-stat-label">144万目标用户 × 平均客单价¥200/套</div>
+      </div>
+      <div class="market-stat">
+        <div class="market-stat-num">¥5800万</div>
+        <div class="market-stat-sub">SOM · 首年可实现收入</div>
+        <div class="market-stat-label">2.9万客户 × ¥200 客单价（保守估计）</div>
+      </div>
+    </div>
+
+    <div class="assumption-list" style="margin-top:20px">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">关键假设说明</div>
+      <div class="assumption"><div><div class="assumption-key">消费级打印机存量用户</div><div class="assumption-note">创想三维累计出货550万台，加上其他品牌，国内消费级存量估算约800万（去除出口）</div></div><div class="assumption-val">800万</div></div>
+      <div class="assumption"><div><div class="assumption-key">新手/闲置比例</div><div class="assumption-note">行业共识：约60%新购者在3个月内出现"打什么"的困境</div></div><div class="assumption-val">60%</div></div>
+      <div class="assumption"><div><div class="assumption-key">套件付费意愿</div><div class="assumption-note">类比乐高、手办改装套件用户，愿意为"省时省力"付溢价的比例</div></div><div class="assumption-val">30%</div></div>
+      <div class="assumption"><div><div class="assumption-key">平均客单价</div><div class="assumption-note">模型+配件+教程，估算成本¥80-120，售价¥180-280，取中间值</div></div><div class="assumption-val">¥200</div></div>
+    </div>
+  </div>
+
+  <!-- S3: MARKET GROWTH -->
+  <div class="slide" id="slide-2">
+    <div class="slide-label">03 · 市场趋势</div>
+    <h2>风口还是泡沫？</h2>
+    <div class="card-grid cols-2">
+      <div class="card green">
+        <div class="card-icon">📈</div>
+        <div class="card-title">增量持续扩大</div>
+        <p>2024年消费级出货376万台，增速51.6%。每年新增数十万"入门新手"，是持续扩充的目标用户池。</p>
+      </div>
+      <div class="card gold">
+        <div class="card-icon">💰</div>
+        <div class="card-title">价格门槛骤降</div>
+        <p>入门级打印机均价已降至千元以内。更多人买得起，但"买完不知道做什么"的问题反而更突出。</p>
+      </div>
+      <div class="card accent">
+        <div class="card-icon">🎨</div>
+        <div class="card-title">DIY 消费趋势</div>
+        <p>小红书、B站上"3D打印改造"内容持续涌现，用户有改造欲望但缺乏完整方案。内容即需求验证。</p>
+      </div>
+      <div class="card blue">
+        <div class="card-icon">🌏</div>
+        <div class="card-title">可扩展至海外</div>
+        <p>中国入门级打印机占全球94%出货，套件产品可天然复用供应链，低成本打入欧美市场。</p>
+      </div>
+    </div>
+    <div class="verdict-box" style="margin-top:20px">
+      <div class="verdict-title">市场判断</div>
+      <div class="verdict-text">这不是一个已经成熟的红海，而是一个<strong>正在被硬件爆发"催熟"的增量市场</strong>。打印机卖出去的那一刻，你的潜在客户就多了一个。时机点刚好。</div>
+    </div>
+  </div>
+
+  <!-- S4: PROBLEMS -->
+  <div class="slide" id="slide-3">
+    <div class="slide-label">04 · 挑战拆解</div>
+    <h2>四个核心挑战</h2>
+    <p style="margin-bottom:16px">点击展开各挑战的分析与应对 ↓</p>
+    <div class="problem-block" onclick="toggleProblem(this)">
+      <div class="problem-header"><div class="problem-title">① 平台竞争与闭环（MakerWorld 等）</div><span class="problem-tag tag-mid">中等威胁</span><span class="chevron">›</span></div>
+      <div class="problem-answer"><p>MakerWorld 的闭环是针对<strong style="color:var(--paper)">创作者端</strong>的，不是针对消费者端的。你的产品是"实物套件"，平台无法复制这一履约能力。你与平台的关系不是竞争，而是<strong style="color:var(--paper)">平台提供流量入口，你提供增值转化</strong>。可以把免费模型作为引流钩子，套件作为付费转化。</p></div>
+    </div>
+    <div class="problem-block" onclick="toggleProblem(this)">
+      <div class="problem-header"><div class="problem-title">② 版权与抄袭风险</div><span class="problem-tag tag-hard">高风险</span><span class="chevron">›</span></div>
+      <div class="problem-answer"><p>这是真实痛点，但护城河不止是模型本身。<strong style="color:var(--paper)">你的壁垒在于"组合"</strong>：特定模型 × 特定改件配方 × 特定教程体验。即使模型被复制，套件的选品、改件采购、教程体验难以完整复制。优先选取自己原创的模型，或与创作者签授权协议并共同绑定利益。</p></div>
+    </div>
+    <div class="problem-block" onclick="toggleProblem(this)">
+      <div class="problem-header"><div class="problem-title">③ 与创作者的合作模式</div><span class="problem-tag tag-mid">可解决</span><span class="chevron">›</span></div>
+      <div class="problem-answer"><p><strong style="color:var(--paper)">建议：不买断，用"套件版税"模式。</strong> 每卖出一套，创作者获固定分成（建议10–15%）。对创作者有吸引力：平台依赖下载量，你给的是"实物商品销售分成"，收入更稳定、更高。你的角色是"创作者变现的另一条管道"。</p></div>
+    </div>
+    <div class="problem-block" onclick="toggleProblem(this)">
+      <div class="problem-header"><div class="problem-title">④ 对创作者的核心吸引力</div><span class="problem-tag tag-ok">可构建</span><span class="chevron">›</span></div>
+      <div class="problem-answer"><p>创作者在平台上的核心痛点：<strong style="color:var(--paper)">流量见顶，收入不稳定，模型被滥用</strong>。你能提供：①稳定版税收入 ②品牌曝光（包装印创作者名字） ③进入"实物商品"赛道的机会。对有商业化意愿的创作者，这是全新增量。</p></div>
+    </div>
+  </div>
+
+  <!-- S5: STAKEHOLDER MAP -->
+  <div class="slide" id="slide-4">
+    <div class="slide-label">05 · 利益相关方分析</div>
+    <h2>Stakeholder 坐标图</h2>
+    <p>X轴：对你商业模式的<strong style="color:var(--paper)">态度（利 ↔ 弊）</strong>　Y轴：对你的<strong style="color:var(--paper)">影响力（低 ↔ 高）</strong>　鼠标悬停/点击节点查看详情</p>
+    <div id="stakeholder-canvas-wrap">
+      <canvas id="stakeholder-canvas" height="420"></canvas>
+      <div class="sh-tooltip" id="sh-tooltip">
+        <div class="sh-tooltip-name" id="sh-name"></div>
+        <div class="sh-tooltip-detail" id="sh-detail"></div>
+      </div>
+    </div>
+    <div class="sh-legend">
+      <div class="sh-legend-item"><div class="sh-legend-dot" style="background:#60c080"></div>强利好</div>
+      <div class="sh-legend-item"><div class="sh-legend-dot" style="background:#d4a843"></div>中性/混合</div>
+      <div class="sh-legend-item"><div class="sh-legend-dot" style="background:#e07070"></div>潜在阻力</div>
+    </div>
+  </div>
+
+  <!-- S6: USER SEGMENTS -->
+  <div class="slide" id="slide-5">
+    <div class="slide-label">06 · 目标群体需求深挖</div>
+    <h2>不同用户，不同需求</h2>
+    <div class="segment-tabs">
+      <button class="seg-tab active" onclick="switchSeg(0)">🧑‍💻 兴趣新手</button>
+      <button class="seg-tab" onclick="switchSeg(1)">🎁 礼品场景</button>
+      <button class="seg-tab" onclick="switchSeg(2)">👩‍🎨 轻量创作者</button>
+      <button class="seg-tab" onclick="switchSeg(3)">👨‍👩‍👧 亲子家庭</button>
+    </div>
+
+    <!-- SEG 0 -->
+    <div class="segment-panel active" id="seg-0">
+      <div class="seg-profile">
+        <div class="seg-avatar">🧑‍💻</div>
+        <div>
+          <div class="seg-name">兴趣新手 · 刚入坑的打印机用户</div>
+          <div class="seg-desc">25–40岁，有一定收入，冲动购买了打印机，却发现"打了一堆小猫小船"之后不知道下一步做什么。对 3D 建模一知半解，想做出有意思的东西。</div>
+          <span class="seg-tag" style="background:#1a3020;color:#60c080">核心群体</span>
+          <span class="seg-tag" style="background:#2a1e18;color:#e0a040">高复购潜力</span>
+        </div>
+      </div>
+      <div class="need-grid">
+        <div class="need-card"><div class="need-card-type functional">功能性需求</div><div class="need-card-title">拿来就能打、打完有成品</div><div class="need-card-desc">不想研究参数，希望套件和打印机直接适配，打出来就能用</div></div>
+        <div class="need-card"><div class="need-card-type emotional">情感性需求</div><div class="need-card-title">成就感与创作认同</div><div class="need-card-desc">"我做出了这个" 的自豪感；想在朋友圈晒出有品质的作品</div></div>
+        <div class="need-card"><div class="need-card-type social">社交性需求</div><div class="need-card-title">加入一个有归属的社区</div><div class="need-card-desc">希望有地方分享成果、获得反馈，而不是孤独地对着一台机器</div></div>
+        <div class="need-card"><div class="need-card-type pain">核心痛点</div><div class="need-card-title">不知从何开始 + 怕失败</div><div class="need-card-desc">买了耗材、下了模型，打出来一堆废品，挫败感极强，容易放弃</div></div>
+      </div>
+      <div class="verdict-box" style="margin-top:14px; border-color:#3a3028">
+        <div class="verdict-title">产品策略建议</div>
+        <div class="verdict-text" style="font-size:13px">强调"成功率"而非"创意"。包装主打"第一次就成功"，配件精确匹配，教程分步详尽。<strong>首单转化</strong>靠的是降低失败恐惧，<strong>复购</strong>靠的是成就感上瘾。</div>
+      </div>
+    </div>
+
+    <!-- SEG 1 -->
+    <div class="segment-panel" id="seg-1">
+      <div class="seg-profile">
+        <div class="seg-avatar">🎁</div>
+        <div>
+          <div class="seg-name">礼品场景 · 送人用的创意礼物</div>
+          <div class="seg-desc">自己不一定有打印机，但想送一份"有意思、有参与感"的礼物。生日、节日、毕业、婚礼……厌倦了千篇一律的礼品。</div>
+          <span class="seg-tag" style="background:#2a1e18;color:#e0a040">高客单价潜力</span>
+          <span class="seg-tag" style="background:#1a2a3a;color:#70a0e0">节点驱动</span>
+        </div>
+      </div>
+      <div class="need-grid">
+        <div class="need-card"><div class="need-card-type functional">功能性需求</div><div class="need-card-title">一站式、开箱即用</div><div class="need-card-desc">收礼者不需要额外准备任何东西，包装好看、内容完整</div></div>
+        <div class="need-card"><div class="need-card-type emotional">情感性需求</div><div class="need-card-title">体现用心与独特性</div><div class="need-card-desc">不是"买来就送"的流水礼，而是"我为你挑了一个特别的体验"</div></div>
+        <div class="need-card"><div class="need-card-type social">社交性需求</div><div class="need-card-title">拍照晒单的社交价值</div><div class="need-card-desc">收礼者完成后想发小红书，这本身就是二次传播</div></div>
+        <div class="need-card"><div class="need-card-type pain">核心痛点</div><div class="need-card-title">不知道接受者有没有打印机</div><div class="need-card-desc">需要提供"无打印机版"选项（预打印好的模型）或明确标注打印机适配要求</div></div>
+      </div>
+      <div class="verdict-box" style="margin-top:14px; border-color:#3a3028">
+        <div class="verdict-title">产品策略建议</div>
+        <div class="verdict-text" style="font-size:13px">推出"成品版"（预打印）+ "DIY版"两种形态，前者面向送礼，后者面向自用。包装设计是关键变量，值得重点投入。节日限定款是高效的营销手段。</div>
+      </div>
+    </div>
+
+    <!-- SEG 2 -->
+    <div class="segment-panel" id="seg-2">
+      <div class="seg-profile">
+        <div class="seg-avatar">👩‍🎨</div>
+        <div>
+          <div class="seg-name">轻量创作者 · 想变现但不知道怎么做</div>
+          <div class="seg-desc">已经有一定建模或打印经验，在小红书/B站有少量粉丝，想把爱好变成收入，但不擅长运营和供应链整合。</div>
+          <span class="seg-tag" style="background:#1a3020;color:#60c080">供给侧合作方</span>
+          <span class="seg-tag" style="background:#2a1e18;color:#e0a040">品牌共建潜力</span>
+        </div>
+      </div>
+      <div class="need-grid">
+        <div class="need-card"><div class="need-card-type functional">功能性需求</div><div class="need-card-title">稳定、可预期的收入来源</div><div class="need-card-desc">平台分成不稳定，希望有持续版税而不是一次性买断</div></div>
+        <div class="need-card"><div class="need-card-type emotional">情感性需求</div><div class="need-card-title">作品被"认真对待"</div><div class="need-card-desc">希望自己的设计被包装成有品质的产品，而不是被当成免费资源</div></div>
+        <div class="need-card"><div class="need-card-type social">社交性需求</div><div class="need-card-title">品牌曝光与粉丝增长</div><div class="need-card-desc">包装上印自己的名字/社媒账号，每卖出一个套件都是一次宣传</div></div>
+        <div class="need-card"><div class="need-card-type pain">核心痛点</div><div class="need-card-title">担心合作方"白嫖"或失联</div><div class="need-card-desc">需要清晰透明的合同、可追溯的销量数据、定期结算机制</div></div>
+      </div>
+      <div class="verdict-box" style="margin-top:14px; border-color:#3a3028">
+        <div class="verdict-title">合作策略建议</div>
+        <div class="verdict-text" style="font-size:13px">对这个群体要做<strong>透明度承诺</strong>：开放销量可查后台 + 按月结算 + 包装注明创作者。初期可以用"联名款"形式降低双方风险，验证后再深化合作。</div>
+      </div>
+    </div>
+
+    <!-- SEG 3 -->
+    <div class="segment-panel" id="seg-3">
+      <div class="seg-profile">
+        <div class="seg-avatar">👨‍👩‍👧</div>
+        <div>
+          <div class="seg-name">亲子家庭 · 寓教于乐的场景</div>
+          <div class="seg-desc">有孩子的家长，想给孩子找一个有创造力的亲子活动。3D打印机作为"高科技玩具"很有吸引力，但家长自己也不会用，希望有完整指引。</div>
+          <span class="seg-tag" style="background:#1a2a3a;color:#70a0e0">潜力群体</span>
+          <span class="seg-tag" style="background:#2a1e18;color:#e0a040">客单价高</span>
+        </div>
+      </div>
+      <div class="need-grid">
+        <div class="need-card"><div class="need-card-type functional">功能性需求</div><div class="need-card-title">安全、儿童友好</div><div class="need-card-desc">零件无尖锐边缘，说明书有儿童版，操作步骤适合亲子共同完成</div></div>
+        <div class="need-card"><div class="need-card-type emotional">情感性需求</div><div class="need-card-title">亲子共创的记忆</div><div class="need-card-desc">"我们一起做出来了"的体验，比成品本身更有价值</div></div>
+        <div class="need-card"><div class="need-card-type social">社交性需求</div><div class="need-card-title">在家长圈子里的认可</div><div class="need-card-desc">带孩子做3D打印手工，比"又给孩子报了一个补习班"更有话题感</div></div>
+        <div class="need-card"><div class="need-card-type pain">核心痛点</div><div class="need-card-title">担心孩子搞不定就放弃</div><div class="need-card-desc">需要"保证成功"的产品设计：即使打印不完美，组合后也要好看</div></div>
+      </div>
+      <div class="verdict-box" style="margin-top:14px; border-color:#3a3028">
+        <div class="verdict-title">产品策略建议</div>
+        <div class="verdict-text" style="font-size:13px">开发"亲子系列"子品牌，主打6–12岁适龄场景。定价可比普通套件高30–50%（家长愿意为孩子多付）。与教育类博主合作是低成本的高效获客路径。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S7: FEASIBILITY TABLE -->
+  <div class="slide" id="slide-6">
+    <div class="slide-label">07 · 可行性评估</div>
+    <h2>综合维度打分</h2>
+    <table class="opp-table">
+      <thead><tr><th>维度</th><th>评分</th><th>判断理由</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--paper)">市场需求</strong></td><td><span class="badge badge-green">✦ 强</span></td><td>新手用户真实存在，闲置打印机是普遍现象，且每年新增</td></tr>
+        <tr><td><strong style="color:var(--paper)">产品差异化</strong></td><td><span class="badge badge-green">✦ 明显</span></td><td>"套件体验"无法被数字平台直接替代</td></tr>
+        <tr><td><strong style="color:var(--paper)">市场规模</strong></td><td><span class="badge badge-yellow">△ 中等</span></td><td>SAM约29亿，首年SOM约5800万，规模不大但增速确定</td></tr>
+        <tr><td><strong style="color:var(--paper)">护城河</strong></td><td><span class="badge badge-yellow">△ 中等</span></td><td>依赖选品眼光、供应链整合与品牌积累，短期可建立</td></tr>
+        <tr><td><strong style="color:var(--paper)">竞争压力</strong></td><td><span class="badge badge-yellow">△ 中等</span></td><td>平台暂无直接复制动机；但门槛不高，跟随者会快速出现</td></tr>
+        <tr><td><strong style="color:var(--paper)">启动成本</strong></td><td><span class="badge badge-green">✦ 低</span></td><td>可以从单款爆品开始，库存极轻；先验证，再扩品</td></tr>
+        <tr><td><strong style="color:var(--paper)">版权/法律风险</strong></td><td><span class="badge badge-red">⚠ 需注意</span></td><td>需建立清晰的模型授权流程，早期优先自建 IP</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- S8: ROADMAP -->
+  <div class="slide" id="slide-7">
+    <div class="slide-label">08 · 建议路径</div>
+    <h2>从 0 到 1 的节奏</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><div class="step-content"><div class="step-title">做一个「最小完整套件」验证需求</div><p>选一个你自己建模的作品（比如带 LED 的灯罩），配好所有硬件，拍完整开箱视频。先在小红书/B站冷启动，看转化反应。不要一上来就做平台。</p></div></div>
+      <div class="step"><div class="step-num">02</div><div class="step-content"><div class="step-title">建立创作者合作的标准合同与分成模板</div><p>设计一份"套件版税协议"：明确授权范围、分成比例（建议10–15%）、品牌使用权。这是你构建供给侧飞轮的基础。</p></div></div>
+      <div class="step"><div class="step-num">03</div><div class="step-content"><div class="step-title">打造 3–5 款核心 SKU，而非无限扩品</div><p>聚焦在 2–3 个品类（灯具 / 手办改装 / 家居小物），打磨复购逻辑。爆品逻辑比品类宽度更重要。</p></div></div>
+      <div class="step"><div class="step-num">04</div><div class="step-content"><div class="step-title">用内容做护城河，而非靠产品本身</div><p>每个套件都配套完整的"制作过程"内容。内容本身就是 SEO + 社区 + 信任背书。这比申请专利更实际，也更快速。</p></div></div>
+    </div>
+  </div>
+
+  <!-- S9: VERDICT -->
+  <div class="slide" id="slide-8">
+    <div class="slide-label">09 · 总结判断</div>
+    <h2>值得做，但要找准定位</h2>
+    <div class="card-grid cols-2">
+      <div class="card green"><div class="card-icon">✅</div><div class="card-title">你的优势</div><p>懂建模 + 懂打印 + 有产品感知。这个组合在"卖家"里非常稀缺，大多数卖家要么只懂供应链，要么只懂设计。</p></div>
+      <div class="card red"><div class="card-icon">⚠️</div><div class="card-title">最大风险</div><p>被人快速复制。应对方式：先建内容壁垒，再建品牌认知，最后才是产品护城河。顺序不能颠倒。</p></div>
+    </div>
+    <div class="verdict-box">
+      <div class="verdict-title">Claude 的综合判断</div>
+      <div class="verdict-text">这个方向<strong>可行，且有真实的市场空白</strong>。市场规模虽非千亿级，但增速确定，且你可以从极低成本验证开始。<br><br>你的核心命题是：把"打印机用户"变成"创作者"——提供的不是耗材，而是<strong>成就感</strong>。<br><br><span style="color:var(--gold)">建议第一步：做一款，卖 100 套，验证复购意愿。</span></div>
+    </div>
+    <p style="margin-top:18px; font-size:12px; color:var(--muted); text-align:center">如需进一步深化：商业计划书 / 定价模型 / 创作者合同模板 / 竞品分析</p>
+  </div>
+
+</div><!-- /deck -->
+
+<script>
+  // SLIDE NAV
+  let current = 0;
+  const total = 9;
+  function init() {
+    const dotsEl = document.getElementById('dots');
+    for (let i = 0; i < total; i++) {
+      const d = document.createElement('button');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dotsEl.appendChild(d);
+    }
+    updateUI();
+    setTimeout(drawStakeholderMap, 300);
+  }
+  function goTo(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    document.querySelectorAll('.dot')[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    document.getElementById('slide-' + current).classList.add('active');
+    document.querySelectorAll('.dot')[current].classList.add('active');
+    updateUI();
+    if (current === 4) setTimeout(drawStakeholderMap, 100);
+  }
+  function changeSlide(dir) { goTo(current + dir); }
+  function updateUI() {
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === total - 1;
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+
+  // PROBLEM TOGGLE
+  function toggleProblem(el) { el.classList.toggle('open'); }
+
+  // SEGMENT TABS
+  function switchSeg(i) {
+    document.querySelectorAll('.seg-tab').forEach((t,j) => t.classList.toggle('active', i===j));
+    document.querySelectorAll('.segment-panel').forEach((p,j) => p.classList.toggle('active', i===j));
+  }
+
+  // STAKEHOLDER MAP
+  const stakeholders = [
+    { name: '兴趣新手用户', x: 0.78, y: 0.72, color: '#60c080', r: 22, detail: '你的核心客户。对你高度正向：他们渴望你的产品。影响力也高——他们的口碑传播直接决定存活。' },
+    { name: '3D模型创作者', x: 0.62, y: 0.65, color: '#60c080', r: 18, detail: '供给侧关键合作方。正向：你给他们一条全新的变现路径。影响力高：没有他们，内容供给受限。' },
+    { name: '礼品消费者', x: 0.70, y: 0.45, color: '#60c080', r: 16, detail: '高客单价的增量市场，对你完全正向。影响力中等，属于节点性消费，不构成日常核心。' },
+    { name: '亲子家庭', x: 0.58, y: 0.38, color: '#d4a843', r: 14, detail: '潜力群体但需要专门的产品开发。对你中性偏正，影响力中低，适合第二阶段扩展。' },
+    { name: 'MakerWorld / 拓竹', x: 0.35, y: 0.80, color: '#d4a843', r: 20, detail: '最大的平台型竞争者，但关系并非纯对立。他们提供的是数字内容，你提供实物体验。影响力极高——他们的策略变化会直接影响你的供给和流量。' },
+    { name: '打印机硬件厂商', x: 0.60, y: 0.82, color: '#60c080', r: 16, detail: '创想三维、拓竹等。对你正向——打印机卖得越多，你的潜在客户越多。影响力高，但方向是助力。' },
+    { name: '电商平台（淘宝/京东）', x: 0.50, y: 0.55, color: '#d4a843', r: 14, detail: '渠道方，对你中性。影响力中等：抽佣会压缩利润，但提供了现成流量。建议先走自营或私域，再上平台。' },
+    { name: '版权方 / 正版IP', x: 0.28, y: 0.60, color: '#e07070', r: 16, detail: '如果你做了未授权的IP改款，这是最直接的法律风险方。影响力中高，需要早期主动规避，优先做原创内容。' },
+    { name: '山寨跟风者', x: 0.22, y: 0.42, color: '#e07070', r: 14, detail: '一旦你验证了市场，仿制品会快速涌现。对你负向，影响力中等。护城河建设（品牌+内容）是对抗方式。' },
+    { name: '物流/供应链', x: 0.48, y: 0.28, color: '#d4a843', r: 12, detail: '配件供应商、打包物流等。对你基本中性，影响力低到中。初期可用现成供应链，规模后再优化。' },
+  ];
+
+  function drawStakeholderMap() {
+    const canvas = document.getElementById('stakeholder-canvas');
+    const wrap = document.getElementById('stakeholder-canvas-wrap');
+    const W = wrap.clientWidth;
+    const H = 420;
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    ctx.fillStyle = '#1a1410';
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = '#2a2418';
+    ctx.lineWidth = 1;
+    // center lines
+    ctx.strokeStyle = '#3a3028';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(W/2, 20); ctx.lineTo(W/2, H-20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(20, H/2); ctx.lineTo(W-20, H/2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Axis labels
+    ctx.font = '11px Space Mono, monospace';
+    ctx.fillStyle = '#7a7060';
+    ctx.textAlign = 'center';
+    ctx.fillText('← 对你不利', W * 0.2, H - 8);
+    ctx.fillText('对你有利 →', W * 0.8, H - 8);
+    ctx.save();
+    ctx.translate(14, H/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('影响力 高 ↑', 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(14, H * 0.7);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillStyle = '#3a3028';
+    ctx.fillText('影响力 低 ↓', 0, 0);
+    ctx.restore();
+
+    // Quadrant labels
+    ctx.font = '10px Space Mono, monospace';
+    ctx.fillStyle = '#2a2418';
+    ctx.textAlign = 'left';
+    ctx.fillText('关键管理', W/2 + 8, 36);
+    ctx.fillStyle = '#2a2418';
+    ctx.textAlign = 'right';
+    ctx.fillText('重点合作', W/2 - 8, 36);
+
+    // Draw nodes
+    stakeholders.forEach(s => {
+      const cx = s.x * W;
+      const cy = (1 - s.y) * (H - 40) + 20;
+
+      // Glow
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, s.r * 2);
+      grd.addColorStop(0, s.color + '33');
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(cx, cy, s.r * 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Circle
+      ctx.fillStyle = s.color + '22';
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, s.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Label
+      ctx.fillStyle = '#f5f0e8';
+      ctx.font = `${Math.max(9, s.r * 0.55)}px Noto Serif SC, serif`;
+      ctx.textAlign = 'center';
+      const lines = s.name.length > 6 ? [s.name.slice(0,4), s.name.slice(4)] : [s.name];
+      lines.forEach((l, i) => {
+        ctx.fillText(l, cx, cy + (i - (lines.length-1)/2) * (s.r * 0.6) + 4);
+      });
+    });
+
+    // Interaction
+    const tooltip = document.getElementById('sh-tooltip');
+    const shName = document.getElementById('sh-name');
+    const shDetail = document.getElementById('sh-detail');
+
+    canvas.onmousemove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (W / rect.width);
+      const my = (e.clientY - rect.top) * (H / rect.height);
+      let hit = null;
+      stakeholders.forEach(s => {
+        const cx = s.x * W;
+        const cy = (1 - s.y) * (H - 40) + 20;
+        if (Math.hypot(mx-cx, my-cy) < s.r + 4) hit = s;
+      });
+      if (hit) {
+        shName.textContent = hit.name;
+        shName.style.color = hit.color;
+        shDetail.textContent = hit.detail;
+        let tx = e.clientX - wrap.getBoundingClientRect().left + 12;
+        let ty = e.clientY - wrap.getBoundingClientRect().top + 12;
+        if (tx + 260 > wrap.clientWidth) tx -= 270;
+        tooltip.style.left = tx + 'px';
+        tooltip.style.top = ty + 'px';
+        tooltip.style.opacity = '1';
+        canvas.style.cursor = 'pointer';
+      } else {
+        tooltip.style.opacity = '0';
+        canvas.style.cursor = 'default';
+      }
+    };
+    canvas.onmouseleave = () => { tooltip.style.opacity = '0'; };
+  }
+
+  window.addEventListener('resize', () => { if (current === 4) drawStakeholderMap(); });
+
+  init();
+</script>
+</body>
+</html>
